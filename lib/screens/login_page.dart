@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/logo.png', height: 100), // Adapter le chemin
+                  Image.asset('assets/iamges/logo.png', height: 100), // Adapter le chemin
                   const SizedBox(height: 30),
                 ],
               ),

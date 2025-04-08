@@ -42,15 +42,25 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF8F8DC),
+        title: const Text('Inscription'),
+        centerTitle: true,
+      ),
+
       backgroundColor: const Color(0xFFF8F8DC),
       
       body: Padding(
         padding: const EdgeInsets.all(32.0),
-        
+          
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           
+          
           children: [
+
+           
             const Image(image: AssetImage('assets/images/logo.png'), height: 80),
             
             const SizedBox(height: 24),
