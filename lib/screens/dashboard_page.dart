@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'champ_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -88,7 +89,12 @@ class DashboardPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildDashboardButton(context, 'Mes Champs'),
+                      _buildDashboardButton(context, 'Mes Champs', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ChampPage()),
+                        );
+                      }),
                       _buildDashboardButton(context, 'Torréfaction'),
                       _buildDashboardButton(context, 'Assemblages'),
                       _buildDashboardButton(context, 'Concours CMTM'),
@@ -116,11 +122,11 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardButton(BuildContext context, String title) {
+  Widget _buildDashboardButton(BuildContext context, String title, [VoidCallback? onPressed]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
