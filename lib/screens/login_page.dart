@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,13 +12,25 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
 
-  void login() {
-    // 🔐 Implémentation Firebase Auth à mettre ici
+  void login() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    print("Tentative de login avec $email / $password");
+    // Remplacez ceci par votre logique d'authentification
+    final user = await _authService.login(email, password);
+
+    if (user != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur de connexion")),
+      );
+    }
   }
 
   @override
@@ -42,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/iamges/logo.png', height: 100), // Adapter le chemin
+                  Image.asset('assets/images/logo.png', height: 100), // Adapter le chemin
                   const SizedBox(height: 30),
                 ],
               ),
