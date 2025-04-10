@@ -9,7 +9,8 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userDoc = FirebaseFirestore.instance.collection('joueurs').doc(user?.uid);
+    final userDoc =
+        FirebaseFirestore.instance.collection('joueurs').doc(user?.uid);
 
     return Scaffold(
       appBar: AppBar(
@@ -36,56 +37,67 @@ class DashboardPage extends StatelessWidget {
             }
 
             final userData = snapshot.data!.data() as Map<String, dynamic>;
-            final firstName = userData['firstName'] ?? 'Utilisateur inconnu';
-            final lastName = userData['lastName'] ?? '';
+            final firstName = userData['prenom'] ?? 'Utilisateur inconnu';
+            final lastName = userData['nom'] ?? '';
             final deevee = userData['deevee'] ?? 0;
             final grains_or = userData['grains_or'] ?? 0;
+            final avatarUrl = userData['avatar'] ??
+                'https://cdn-icons-png.flaticon.com/512/147/147144.png';
 
             return Column(
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundImage: AssetImage('assets/images/default_avatar.png'),
+                      backgroundImage: NetworkImage(avatarUrl),
+                      backgroundColor: Colors.grey.shade200,
                     ),
                     const SizedBox(width: 10),
-                    Flexible(
+                    Expanded(
+                      // <-- pour éviter l'overflow
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('$firstName $lastName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text('$firstName $lastName',
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
                           Row(
                             children: [
                               const Icon(Icons.diamond, color: Colors.blue),
                               const SizedBox(width: 5),
-                              Text('$deevee DeeVee', style: const TextStyle(fontSize: 14)),
+                              Text('$deevee DeeVee',
+                                  style: const TextStyle(fontSize: 14)),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    Flexible(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.monetization_on, color: Colors.amber),
-                              const SizedBox(width: 5),
-                              Text('Grains d\'Or : $grains_or', style: const TextStyle(fontSize: 14)),
-                            ],
-                          ),
-                          Row(
-                            children: const [
-                              Icon(Icons.emoji_events, color: Colors.orange),
-                              SizedBox(width: 5),
-                              Text('CMTM dans 15 min', style: TextStyle(fontSize: 14)),
-                            ],
-                          ),
-                        ],
-                      ),
+                    const SizedBox(
+                        width: 10), // petit espace avant les infos de droite
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.monetization_on,
+                                color: Colors.amber),
+                            const SizedBox(width: 5),
+                            Text('Grains d\'Or : $grains_or',
+                                style: const TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: const [
+                            Icon(Icons.emoji_events, color: Colors.orange),
+                            SizedBox(width: 5),
+                            Text('CMTM dans 15 min',
+                                style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -97,7 +109,8 @@ class DashboardPage extends StatelessWidget {
                       _buildDashboardButton(context, 'Mes Champs', () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ChampPage()),
+                          MaterialPageRoute(
+                              builder: (context) => const ChampsPage()),
                         );
                       }),
                       _buildDashboardButton(context, 'Torréfaction'),
@@ -127,7 +140,8 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardButton(BuildContext context, String title, [VoidCallback? onPressed]) {
+  Widget _buildDashboardButton(BuildContext context, String title,
+      [VoidCallback? onPressed]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ElevatedButton(
