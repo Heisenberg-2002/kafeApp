@@ -9,7 +9,7 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final userDoc = FirebaseFirestore.instance.collection('users').doc(user?.uid);
+    final userDoc = FirebaseFirestore.instance.collection('joueurs').doc(user?.uid);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,6 +39,7 @@ class DashboardPage extends StatelessWidget {
             final firstName = userData['firstName'] ?? 'Utilisateur inconnu';
             final lastName = userData['lastName'] ?? '';
             final deevee = userData['deevee'] ?? 0;
+            final grains_or = userData['grains_or'] ?? 0;
 
             return Column(
               children: [
@@ -49,38 +50,42 @@ class DashboardPage extends StatelessWidget {
                       backgroundImage: AssetImage('assets/images/default_avatar.png'),
                     ),
                     const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('$firstName $lastName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        Row(
-                          children: [
-                            const Icon(Icons.diamond, color: Colors.blue),
-                            const SizedBox(width: 5),
-                            Text('$deevee DeeVee', style: const TextStyle(fontSize: 14)),
-                          ],
-                        ),
-                      ],
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$firstName $lastName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              const Icon(Icons.diamond, color: Colors.blue),
+                              const SizedBox(width: 5),
+                              Text('$deevee DeeVee', style: const TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: const [
-                            Icon(Icons.monetization_on, color: Colors.amber),
-                            SizedBox(width: 5),
-                            Text('Grains d\'Or : 0', style: TextStyle(fontSize: 14)),
-                          ],
-                        ),
-                        Row(
-                          children: const [
-                            Icon(Icons.emoji_events, color: Colors.orange),
-                            SizedBox(width: 5),
-                            Text('CMTM dans 15 min', style: TextStyle(fontSize: 14)),
-                          ],
-                        ),
-                      ],
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.monetization_on, color: Colors.amber),
+                              const SizedBox(width: 5),
+                              Text('Grains d\'Or : $grains_or', style: const TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                          Row(
+                            children: const [
+                              Icon(Icons.emoji_events, color: Colors.orange),
+                              SizedBox(width: 5),
+                              Text('CMTM dans 15 min', style: TextStyle(fontSize: 14)),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

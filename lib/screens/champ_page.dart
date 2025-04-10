@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChampPage extends StatelessWidget {
   const ChampPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(user?.uid);
+    final champsCollection = FirebaseFirestore.instance.collection('champs').where('userId', isEqualTo: user?.uid);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mes Champs'),
