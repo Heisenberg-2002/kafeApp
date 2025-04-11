@@ -18,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    // Remplacez ceci par votre logique d'authentification
     final user = await _authService.login(email, password);
 
     if (user != null) {
@@ -44,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             const SizedBox(height: 50),
 
-             // 🔙 Bouton retour
+            // 🔙 Bouton retour
             IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.brown),
               onPressed: () => Navigator.pop(context),
@@ -55,7 +54,8 @@ class _LoginPageState extends State<LoginPage> {
             Center(
               child: Column(
                 children: [
-                  Image.asset('assets/images/logo.png', height: 100), // Adapter le chemin
+                  Image.asset('assets/images/logo.png',
+                      height: 100), // Adapter le chemin
                   const SizedBox(height: 30),
                 ],
               ),
@@ -74,9 +74,10 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               controller: passwordController,
               obscureText: true,
-              decoration: const InputDecoration(hintText: 'Choisissez un mot de passe'),
+              decoration:
+                  const InputDecoration(hintText: 'Choisissez un mot de passe'),
             ),
-           
+
             const SizedBox(height: 20),
 
             // 🚀 Bouton Connexion

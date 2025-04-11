@@ -1,15 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/kafe_model.dart';
+import 'kafe_service.dart';
 
 class SechageService {
   static Future<void> recolterEtEnvoyerAuSechage({
     required User? user,
     required String champId,
     required String planId,
-    required Kafe kafe,
+    required String kafeId,
   }) async {
-    if (user == null || kafe.id.isEmpty) return;
+    if (user == null || kafeId.isEmpty) return;
+
+    final doc = await KafeService.getKafeById(kafeId);
+    if (!doc.exists) return;
+
+    final data = doc.data() as Map<String, dynamic>;
+    final kafe = Kafe.fromMap(doc.id, data);
+
+    final int poidsAvant = kafe.rendementFruit;
+    final int quantiteFinale = (poidsAvant * 0.9542).round();
+
+    final sechageRef = FirebaseFirestore.instance
+        .collection('joueurs')
+        .doc(user.uid)
+        .collection('sechage')
+        .doc();
 
     final planRef = FirebaseFirestore.instance
         .collection('joueurs')
@@ -19,16 +35,9 @@ class SechageService {
         .collection('plans')
         .doc(planId);
 
-    final sechageRef = FirebaseFirestore.instance
-        .collection('joueurs')
-        .doc(user.uid)
-        .collection('sechage')
-        .doc();
-
-    final quantiteFinale = (kafe.rendementFruit.toDouble() * 0.9542).round();
-
     await sechageRef.set({
       'kafe_id': kafe.id,
+      'kafe_nom': kafe.nom, // ✅ Ajout ici
       'quantite': quantiteFinale,
       'champ_id': champId,
       'plan_id': planId,

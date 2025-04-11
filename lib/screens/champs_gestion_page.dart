@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kafe/services/sechage_service.dart';
 import '../models/kafe_model.dart';
 import '../services/kafe_service.dart';
 import '../services/pousse_service.dart';
@@ -78,12 +79,11 @@ class _ChampGestionPageState extends State<ChampGestionPage> {
   }
 
   Future<void> _recolter() async {
-    await PousseService.recolterEtEnvoyerAuSechage(
+    await SechageService.recolterEtEnvoyerAuSechage(
       user: user,
       champId: widget.champId,
       planId: 'planActif1',
       kafeId: kafeId,
-      rendement: rendement,
     );
     await _loadPlan();
   }
@@ -131,6 +131,25 @@ class _ChampGestionPageState extends State<ChampGestionPage> {
         );
       },
     );
+  }
+
+  Future<void> _updateKafeQuantity(String kafeId, int quantityUsed) async {
+    final kafeRef = FirebaseFirestore.instance.collection('kafes').doc(kafeId);
+    final kafeSnapshot = await kafeRef.get();
+
+    if (kafeSnapshot.exists) {
+      final kafeData = kafeSnapshot.data() as Map<String, dynamic>;
+      final currentQuantity = kafeData['quantite'] ?? 0;
+
+      // Update the quantity after usage
+      final newQuantity = currentQuantity - quantityUsed;
+      if (newQuantity <= 0) {
+        // If quantity reaches 0, remove kafe from the list
+        await kafeRef.delete();
+      } else {
+        await kafeRef.update({'quantite': newQuantity});
+      }
+    }
   }
 
   @override

@@ -27,13 +27,27 @@ class Kafe {
     return Kafe(
       id: id,
       nom: data['nom'] ?? '',
-      cout: data['cout'] ?? 0,
-      dureePousse: data['duree_pousse'] ?? 0,
-      rendementFruit: data['rendement_fruit'] ?? 0,
-      gout: data['gout'] ?? 0,
-      amertume: data['amertume'] ?? 0,
-      teneur: data['teneur'] ?? 0,
-      odorat: data['odorat'] ?? 0,
+      cout: data['cout'] is int
+          ? data['cout']
+          : int.tryParse(data['cout'].toString()) ?? 0,
+      dureePousse: data['duree_pousse'] is int
+          ? data['duree_pousse']
+          : int.tryParse(data['duree_pousse'].toString()) ?? 0,
+      rendementFruit: data['rendement_fruit'] is int
+          ? data['rendement_fruit']
+          : int.tryParse(data['rendement_fruit'].toString()) ?? 0,
+      gout: data['gout'] is int
+          ? data['gout']
+          : int.tryParse(data['gout'].toString()) ?? 0,
+      amertume: data['amertume'] is int
+          ? data['amertume']
+          : int.tryParse(data['amertume'].toString()) ?? 0,
+      teneur: data['teneur'] is int
+          ? data['teneur']
+          : int.tryParse(data['teneur'].toString()) ?? 0,
+      odorat: data['odorat'] is int
+          ? data['odorat']
+          : int.tryParse(data['odorat'].toString()) ?? 0,
       avatar: data['avatar'] ?? '',
     );
   }

@@ -58,7 +58,6 @@ class DashboardPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      // <-- pour éviter l'overflow
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -76,8 +75,7 @@ class DashboardPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(
-                        width: 10), // petit espace avant les infos de droite
+                    const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -119,11 +117,20 @@ class DashboardPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
+                              builder: (context) => const SechagePage()),
+                        );
+                      }),
+                      _buildDashboardButton(
+                        context,
+                        'Concours CMTM',
+                      ),
+                      _buildDashboardButton(context, 'Liste des Kafes', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
                               builder: (context) => const KafesListPage()),
                         );
                       }),
-                      _buildDashboardButton(context, 'Assemblages'),
-                      _buildDashboardButton(context, 'Concours CMTM'),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {},
