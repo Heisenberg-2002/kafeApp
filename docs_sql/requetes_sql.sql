@@ -1,4 +1,3 @@
--- Création de la table Joueurs
 CREATE TABLE Joueurs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
@@ -8,7 +7,6 @@ CREATE TABLE Joueurs (
     date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Création de la table Kafes
 CREATE TABLE Kafes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
@@ -21,7 +19,6 @@ CREATE TABLE Kafes (
     duree_pousse INT DEFAULT 0
 );
 
--- Création de la table Champs
 CREATE TABLE Champs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
@@ -30,14 +27,12 @@ CREATE TABLE Champs (
     FOREIGN KEY (joueur_id) REFERENCES Joueurs(id)
 );
 
--- Création de la table Exploitation (pour lier plusieurs champs à un joueur)
 CREATE TABLE Exploitations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     joueur_id INT,
     FOREIGN KEY (joueur_id) REFERENCES Joueurs(id)
 );
 
--- Table de l'assemblage des Kafés
 CREATE TABLE Assemblages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     joueur_id INT,
@@ -47,8 +42,6 @@ CREATE TABLE Assemblages (
     FOREIGN KEY (joueur_id) REFERENCES Joueurs(id),
     FOREIGN KEY (kafe_id) REFERENCES Kafes(id)
 );
-
--- Table pour soumettre un Kafé au concours
 CREATE TABLE Concours (
     id INT AUTO_INCREMENT PRIMARY KEY,
     joueur_id INT,

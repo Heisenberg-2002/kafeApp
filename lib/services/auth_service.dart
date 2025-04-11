@@ -5,10 +5,8 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Connexion
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
-      // Connexion avec Firebase Auth
       UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
@@ -17,7 +15,6 @@ class AuthService {
       final User? user = result.user;
 
       if (user != null) {
-        // Récupération des infos du joueur dans Firestore
         final DocumentSnapshot joueurDoc =
             await _firestore.collection('joueurs').doc(user.uid).get();
 
@@ -37,11 +34,9 @@ class AuthService {
     }
   }
 
-  /// Inscription + création du document joueur lié à l'UID Firebase
   Future<User?> register(
       String email, String password, String firstName, String lastName) async {
     try {
-      // Création de l'utilisateur dans Firebase Auth
       UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -50,7 +45,6 @@ class AuthService {
       final User? user = result.user;
 
       if (user != null) {
-        // Création du document joueur dans Firestore
         await _firestore.collection('joueurs').doc(user.uid).set({
           'nom': lastName,
           'prenom': firstName,
@@ -72,11 +66,9 @@ class AuthService {
     }
   }
 
-  /// Déconnexion
   Future<void> signOut() async {
     await _auth.signOut();
   }
 
-  /// Écoute en temps réel de l'état de l'utilisateur connecté
   Stream<User?> get user => _auth.authStateChanges();
 }

@@ -141,10 +141,8 @@ class _ChampGestionPageState extends State<ChampGestionPage> {
       final kafeData = kafeSnapshot.data() as Map<String, dynamic>;
       final currentQuantity = kafeData['quantite'] ?? 0;
 
-      // Update the quantity after usage
       final newQuantity = currentQuantity - quantityUsed;
       if (newQuantity <= 0) {
-        // If quantity reaches 0, remove kafe from the list
         await kafeRef.delete();
       } else {
         await kafeRef.update({'quantite': newQuantity});

@@ -167,11 +167,8 @@ class _AssemblagePageState extends State<AssemblagePage> {
       final nouveauStock = stockActuel - quantiteUtilisee;
       stockData[kafeId] = nouveauStock < 0 ? 0 : nouveauStock;
 
-      // Mise à jour de la collection 'sechage' si quantité = 0, supprimer l'élément
       if (nouveauStock == 0) {
-        await sechageRef
-            .doc(kafeId)
-            .delete(); // Supprimer le kafe de 'sechage' si la quantité est 0
+        await sechageRef.doc(kafeId).delete();
       }
     }
 
