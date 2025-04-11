@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kafe/screens/kafes_list_page.dart';
 import 'champ_page.dart';
+import 'sechage_page.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -113,7 +115,13 @@ class DashboardPage extends StatelessWidget {
                               builder: (context) => const ChampsPage()),
                         );
                       }),
-                      _buildDashboardButton(context, 'Torréfaction'),
+                      _buildDashboardButton(context, 'Torréfaction', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const KafesListPage()),
+                        );
+                      }),
                       _buildDashboardButton(context, 'Assemblages'),
                       _buildDashboardButton(context, 'Concours CMTM'),
                       const SizedBox(height: 20),
