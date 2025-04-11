@@ -1,9 +1,69 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ConcoursPage extends StatelessWidget {
+class ConcoursPage extends StatefulWidget {
   const ConcoursPage({super.key});
+
+  @override
+  State<ConcoursPage> createState() => _ConcoursPageState();
+}
+
+class _ConcoursPageState extends State<ConcoursPage> {
+  Duration timeLeft = const Duration();
+  Timer? countdownTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateTimeLeft();
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _updateTimeLeft();
+    });
+  }
+
+  @override
+  void dispose() {
+    countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _updateTimeLeft() {
+    final now = DateTime.now();
+    final minutesSinceEpoch = now.millisecondsSinceEpoch ~/ 60000;
+    final nextDrawIn = 19 - (minutesSinceEpoch % 19);
+    final secondsLeft = 60 - now.second;
+
+    setState(() {
+      timeLeft = Duration(minutes: nextDrawIn - 1, seconds: secondsLeft);
+    });
+  }
+
+  String _getStatus(Map<String, dynamic> data) {
+    final Timestamp? submittedAt = data['soumis_le'] as Timestamp?;
+    if (submittedAt == null) return 'Résultat en attente';
+
+    final DateTime now = DateTime.now();
+    final DateTime submissionTime = submittedAt.toDate();
+    final difference = now.difference(submissionTime);
+
+    if (difference.inMinutes < 19) return 'Résultat en attente';
+
+    final hash = data['kafe_id'].hashCode;
+    final random = Random(hash);
+    final result = random.nextInt(10); // 0 à 9
+
+    if (result == 0) return '🎉 Gagné ! Vous avez reçu 10 Deevee';
+    return 'Perdu 😢';
+  }
+
+  Color _getStatusColor(String status) {
+    if (status.contains("Gagné")) return Colors.green.shade700;
+    if (status.contains("Perdu")) return Colors.red.shade300;
+    return Colors.orange.shade700;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +74,11 @@ class ConcoursPage extends StatelessWidget {
       );
     }
 
-    final assemblagesRef = FirebaseFirestore.instance
+    final concoursRef = FirebaseFirestore.instance
         .collection('joueurs')
         .doc(user.uid)
-        .collection('assemblages')
-        .orderBy('date', descending: true);
+        .collection('concours')
+        .orderBy('soumis_le', descending: true);
 
     return Scaffold(
       appBar: AppBar(
@@ -26,103 +86,78 @@ class ConcoursPage extends StatelessWidget {
         backgroundColor: Colors.brown.shade400,
       ),
       backgroundColor: const Color(0xFFFFFDE7),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: assemblagesRef.snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("Aucun assemblage créé."));
-          }
-
-          final docs = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final doc = docs[index];
-              final data = doc.data() as Map<String, dynamic>;
-              final quantite = data['quantite_totale'] ?? 0;
-              final gout = data['gout'] ?? 0;
-              final amertume = data['amertume'] ?? 0;
-              final teneur = data['teneur'] ?? 0;
-              final odorat = data['odorat'] ?? 0;
-              final date = (data['date'] as Timestamp?)?.toDate();
-              final dejaSoumis = data['soumis'] == true;
-
-              return Card(
-                margin: const EdgeInsets.all(12),
-                child: ListTile(
-                  title: Text(
-                      "Assemblage du ${date?.toLocal().toString().split('.').first ?? 'inconnu'}"),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Quantité : $quantite g"),
-                      Text(
-                          "Goût : $gout | Amertume : $amertume | Teneur : $teneur | Odorat : $odorat"),
-                      const SizedBox(height: 8),
-                      if (quantite >= 1000 && !dejaSoumis)
-                        ElevatedButton(
-                          onPressed: () => _soumettreAssemblage(
-                              context, user.uid, doc.id, data),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text("Soumettre au concours"),
-                        )
-                      else if (dejaSoumis)
-                        const Text(
-                          "Déjà soumis au concours.",
-                          style: TextStyle(color: Colors.green),
-                        )
-                      else
-                        const Text(
-                          "Assemblage trop léger pour le concours.",
-                          style: TextStyle(color: Colors.redAccent),
-                        ),
-                    ],
-                  ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            color: Colors.brown.shade200,
+            child: Column(
+              children: [
+                const Text(
+                  "⏳ Prochain concours dans :",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              );
-            },
-          );
-        },
+                Text(
+                  "${timeLeft.inMinutes.remainder(60).toString().padLeft(2, '0')} min ${timeLeft.inSeconds.remainder(60).toString().padLeft(2, '0')} sec",
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: concoursRef.snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                      child: Text("Aucune participation au concours."));
+                }
+
+                final docs = snapshot.data!.docs;
+
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
+                    final nomKafe = data['nom_kafe'] ?? 'Inconnu';
+                    final quantite = data['quantite'] ?? 0;
+                    final date = (data['soumis_le'] as Timestamp?)?.toDate();
+                    final status = _getStatus(data);
+
+                    return Card(
+                      margin: const EdgeInsets.all(12),
+                      child: ListTile(
+                        leading: const Icon(Icons.emoji_events,
+                            color: Colors.orange),
+                        title: Text("Kafé : $nomKafe"),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Quantité : $quantite g"),
+                            Text(
+                                "Soumis le : ${date?.toLocal().toString().split('.').first ?? 'inconnu'}"),
+                            const SizedBox(height: 6),
+                            Text(
+                              status,
+                              style: TextStyle(
+                                color: _getStatusColor(status),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
-    );
-  }
-
-  Future<void> _soumettreAssemblage(BuildContext context, String userId,
-      String assemblageId, Map<String, dynamic> assemblage) async {
-    final concoursRef = FirebaseFirestore.instance
-        .collection('joueurs')
-        .doc(userId)
-        .collection('concours')
-        .doc();
-
-    final assemblageRef = FirebaseFirestore.instance
-        .collection('joueurs')
-        .doc(userId)
-        .collection('assemblages')
-        .doc(assemblageId);
-
-    final userRef =
-        FirebaseFirestore.instance.collection('joueurs').doc(userId);
-    await userRef.update({
-      'deevee': FieldValue.increment(5),
-    });
-
-    await concoursRef.set({
-      ...assemblage,
-      'soumis_le': FieldValue.serverTimestamp(),
-    });
-
-    await assemblageRef.update({'soumis': true});
-
-    await assemblageRef.delete();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-          content: Text("Assemblage soumis avec succès et 5 Deevee ajoutés !")),
     );
   }
 }

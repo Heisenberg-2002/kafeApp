@@ -84,7 +84,14 @@ class _LoginPageState extends State<LoginPage> {
             Center(
               child: ElevatedButton(
                 onPressed: login,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.brown),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.brown,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
                 child: const Text("Connexion"),
               ),
             ),

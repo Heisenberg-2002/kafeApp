@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kafe/screens/concours_page.dart';
 import '../services/kafe_service.dart';
 
 class SechagePage extends StatefulWidget {
@@ -13,8 +14,7 @@ class SechagePage extends StatefulWidget {
 class _SechagePageState extends State<SechagePage> {
   final user = FirebaseAuth.instance.currentUser;
   List<Map<String, dynamic>> kafes = [];
-  List<String> selectedKafes =
-      []; // Liste des kafés sélectionnés pour l'assemblage
+  List<String> selectedKafes = [];
 
   @override
   void initState() {
@@ -44,48 +44,56 @@ class _SechagePageState extends State<SechagePage> {
   }
 
   Future<void> _validerAssemblage() async {
-    // Envoyer les kafés sélectionnés au concours et supprimer de la page Séchage
-    for (final kafeId in selectedKafes) {
-      final kafe = kafes.firstWhere((k) => k['kafe_id'] == kafeId);
+    for (final kafeUniqueId in selectedKafes) {
+      final kafe = kafes.firstWhere((k) => k['id'] == kafeUniqueId);
       final quantiteUtilisee = kafe['quantite'];
+      final kafeId = kafe['kafe_id'];
 
-      // Mise à jour de la quantité
+      // Supprimer ou mettre à jour la quantité
       final docRef = FirebaseFirestore.instance
           .collection('joueurs')
           .doc(user!.uid)
           .collection('sechage')
-          .doc(kafe['id']);
-      final updatedQuantite =
-          quantiteUtilisee - quantiteUtilisee; // Total utilisé
+          .doc(kafeUniqueId);
 
-      if (updatedQuantite <= 0) {
-        await docRef.delete(); // Supprimer le kafé s'il n'en reste plus
+      if (quantiteUtilisee <= 0) {
+        await docRef.delete();
       } else {
-        await docRef.update({'quantite': updatedQuantite});
+        await docRef.update({'quantite': 0}); // quantité totalement utilisée
       }
 
-      // Ajout au concours
+      // Récupérer le nom du kafé via KafeService
+      final kafeDoc = await KafeService.getKafeById(kafeId);
+      final data = kafeDoc.data() as Map<String, dynamic>?;
+      final nomKafe = data?['nom'] ?? 'Inconnu';
+
+      // Soumission dans concours
       final concoursRef = FirebaseFirestore.instance
           .collection('joueurs')
           .doc(user!.uid)
           .collection('concours')
           .doc();
+
       await concoursRef.set({
         'kafe_id': kafeId,
+        'nom_kafe': nomKafe,
         'quantite': quantiteUtilisee,
-        'date_soumission': FieldValue.serverTimestamp(),
+        'soumis_le': FieldValue.serverTimestamp(),
       });
     }
 
-    // Réinitialiser la sélection
     setState(() {
       selectedKafes.clear();
     });
 
-    // Afficher un message de succès
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
           content: Text("Assemblage soumis au concours avec succès !")),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const ConcoursPage()),
     );
   }
 
@@ -107,6 +115,7 @@ class _SechagePageState extends State<SechagePage> {
                 final kafeId = kafe['kafe_id'];
                 final quantite = kafe['quantite'];
                 final statut = kafe['statut'];
+                final kafeUniqueId = kafe['id'];
 
                 return Card(
                   margin: const EdgeInsets.all(12),
@@ -135,17 +144,17 @@ class _SechagePageState extends State<SechagePage> {
                     ),
                     trailing: IconButton(
                       icon: Icon(
-                        selectedKafes.contains(kafeId)
+                        selectedKafes.contains(kafeUniqueId)
                             ? Icons.check_box
                             : Icons.check_box_outline_blank,
                         color: Colors.brown,
                       ),
                       onPressed: () {
                         setState(() {
-                          if (selectedKafes.contains(kafeId)) {
-                            selectedKafes.remove(kafeId);
+                          if (selectedKafes.contains(kafeUniqueId)) {
+                            selectedKafes.remove(kafeUniqueId);
                           } else {
-                            selectedKafes.add(kafeId);
+                            selectedKafes.add(kafeUniqueId);
                           }
                         });
                       },
@@ -158,7 +167,7 @@ class _SechagePageState extends State<SechagePage> {
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: ElevatedButton(
-              onPressed: _validerAssemblage,
+              onPressed: selectedKafes.isEmpty ? null : _validerAssemblage,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,

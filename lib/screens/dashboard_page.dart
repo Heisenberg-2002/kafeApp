@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kafe/screens/concours_page.dart';
 import 'package:kafe/screens/kafes_list_page.dart';
 import 'champ_page.dart';
 import 'sechage_page.dart';
@@ -120,10 +121,13 @@ class DashboardPage extends StatelessWidget {
                               builder: (context) => const SechagePage()),
                         );
                       }),
-                      _buildDashboardButton(
-                        context,
-                        'Concours CMTM',
-                      ),
+                      _buildDashboardButton(context, 'Concours CMTM', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ConcoursPage()),
+                        );
+                      }),
                       _buildDashboardButton(context, 'Liste des Kafes', () {
                         Navigator.push(
                           context,
